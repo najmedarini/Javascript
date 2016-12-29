@@ -1,0 +1,209 @@
+<html>
+<head>
+<title>Creating your first app with Flickr API</title>
+<style type="text/css">
+
+</style>
+<script type="text/javascript">
+	function eraseText() {
+    document.getElementById("results").innerHTML = "";
+	document.getElementById("searchbox").value = "";
+}
+	
+function runsearch()
+	{
+txtsearch = document.getElementById('searchbox');
+apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=1e0f0609346f0acca9c31f1e9d7a1d02&format=json&nojsoncallback=1&text="+txtsearch.value+"&page=5&per_page=100";
+		alert(apiurl)
+		
+var getJSON = function(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("get", url, true);
+    xhr.responseType = "json";
+    xhr.onload = function() {
+      var status = xhr.status;
+      if (status == 200) {
+        callback(null, xhr.response);
+      } else {
+        callback(status);
+      }
+    };
+    xhr.send();
+};
+		
+		getJSON(apiurl,function(err, data2) {
+  if (err != null) {
+    alert("Something went wrong: " + err);
+  } else {
+	  var count2 = Object.keys(data2.photos.photo).length;
+	  for (j = 0; j < count2; j++) 
+	  {
+		  
+		  var idphoto="";
+		  idphoto=data2.photos.photo[j].id;
+		  apiurl_size = "https://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=1e0f0609346f0acca9c31f1e9d7a1d02&photo_id="+idphoto+"&format=json&nojsoncallback=1";
+		var div = document.getElementById('results');
+		
+		
+		
+		  
+		getJSON( apiurl_size,function(err, data) {
+  if (err != null) {
+    alert("Something went wrong: " + err);
+  } else {
+	  var count = Object.keys(data.sizes.size).length;
+	  for (i = 0; i < count; i++) {
+
+    
+		  if(data.sizes.size[i].width<100)
+			  {
+				  
+				  div.innerHTML = div.innerHTML + '<div><img  src="'+ data.sizes.size[i].source+'"/ onclick="javascript:showImage(this.id)" id="'+idphoto+'"></div>';
+				  break;
+			  }
+}
+ 
+	  
+	  
+  }
+});
+
+
+
+ 
+	  
+	  
+  }
+  }
+});		
+	}
+</script>
+
+<script type="text/javascript">
+var apiurl,myresult,apiurl_size,selected_size,txtsearch;
+
+	document.addEventListener("DOMContentLoaded", function(event) { 
+  //do work
+		alert("sjkd")
+});
+
+
+
+function showImage(img)
+	{
+	
+
+		apiurl_size = "https://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=1e0f0609346f0acca9c31f1e9d7a1d02&photo_id="+img+"&format=json&nojsoncallback=1";
+		
+		var getJSON = function(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("get", url, true);
+    xhr.responseType = "json";
+    xhr.onload = function() {
+      var status = xhr.status;
+      if (status == 200) {
+        callback(null, xhr.response);
+      } else {
+        callback(status);
+      }
+    };
+    xhr.send();
+};
+		
+		getJSON("https://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=1e0f0609346f0acca9c31f1e9d7a1d02&photo_id="+img+"&format=json&nojsoncallback=1",
+function(err, data) {
+  if (err != null) {
+    alert("Something went wrong: " + err);
+  } else {
+	  var count = Object.keys(data.sizes.size).length;
+	  for (i = 0; i < count; i++) {
+    
+		  if(data.sizes.size[i].width>500)
+			  {
+				  var pages=data.sizes.size[i].source
+				  window.open(data.sizes.size[i].source,"mywin","menubar=0,resizable=1,width="+data.sizes.size[i].width+",height="+data.sizes.size[i].height+"");
+				  break;
+			  }
+}
+ 
+	  
+	  
+  }
+});
+		
+		
+		
+		
+
+}
+function gotData(data)
+	{
+		alert(data);
+	}
+
+	
+	
+function gddetJSONP(url, success) {
+
+    var ud = '_' + +new Date,
+        script = document.createElement('script'),
+        head = document.getElementsByTagName('head')[0] 
+               || document.documentElement;
+
+    window[ud] = function(data) {
+        head.removeChild(script);
+        success && success(data);
+    };
+
+    script.src = url.replace('callback=?', 'callback=' + ud);
+    head.appendChild(script);
+
+}
+
+	
+	
+</script>
+</head>
+<body>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>jQuery.getJSON demo</title>
+  <style>
+  img {
+    height: 100px;
+    float: left;
+  }
+  </style>
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+</head>
+<body>
+ 
+<div id="images"></div>
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h2>Search for photos</h2>
+
+<input type="text" id="searchbox" placeholder="insert a text for search" >
+</div>
+</div>
+<div class="row">
+
+</div>
+<div class="row">
+<div class="col-md-12">
+<h2>Hit This button to fetch photos</h2>
+<button type="button" class="btn btn-success" id="button" onclick="runsearch()">Search  Photos</button>
+<button type="button" class="btn btn-alert" id="reset" onclick="eraseText()">Reset</button>
+<hr>
+</div>
+</div>
+<div class="row">
+<div class="col-md-12">
+<div id="results">Results are:</div>
+</div>
+</div>
+</div>
+</body>
+</html>
