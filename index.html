@@ -1,0 +1,148 @@
+<html>
+<head>
+<title>Creating search with Flickr API</title>
+<style>
+.checkbox { position: absolute; bottom: 0px; right: 0px; }
+.containerimg { position: relative; margin: 5px; width: 100px; height: 100px; float: left;  }
+.containerimg  img {margin:auto; height: 100px;cursor:pointer}
+.button {background-color: #4CAF50; border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px; cursor:pointer}
+button:disabled {background: #ddd;}
+input[type=text] {width: 100%;padding: 12px 20px;margin: 8px 0;box-sizing: border-box;}
+</style>
+<script type="text/javascript">
+var arr=[];
+// when the erase button click this function will run
+	function eraseText() 
+ {
+     document.getElementById("results").innerHTML = ""; 
+	 document.getElementById("searchbox").value = "";
+	 document.getElementById('gallery').disabled=true;
+ }
+function getJSON(url, callback) 
+{
+	
+    var xhr = new XMLHttpRequest();
+    xhr.open("get", url, true);
+    xhr.responseType = "json";
+    xhr.onload = function() {
+      var status = xhr.status;
+      if (status == 200) {
+        callback(null, xhr.response);
+      } else {
+        callback(status);
+      }
+    };
+    xhr.send();
+};
+	
+
+function runsearch()
+  {
+	  // with using flickr.photos.search, search the textsearch to find pictures that are related to this text
+	  txtsearch = document.getElementById('searchbox');
+	  apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=1e0f0609346f0acca9c31f1e9d7a1d02&format=json&nojsoncallback=1&text="+txtsearch.value+"";
+      var div = document.getElementById('results');
+	 	// getJSON call the function and return data  
+	  getJSON(apiurl,function(err2, data2) 
+			{
+				if (err2 != null) 
+				{
+    				alert("Something went wrong: " + err2);
+  				} else 
+				{
+	  				var count2 = data2.photos.photo.length; 
+					for (j = 0; j < count2; j++) 
+	  					{
+							 idphoto=data2.photos.photo[j].id;
+						 
+							 //at first i show the small images
+							 var src="https://farm"+data2.photos.photo[j].farm+".staticflickr.com/"+data2.photos.photo[j].server+"/"+data2.photos.photo[j].id+"_"+
+							 data2.photos.photo[j].secret+"_s.jpg";
+							 arr.push(idphoto);
+							 
+							 //after click on image i call the showimage function to show the big image
+							   div.innerHTML = div.innerHTML + '<div class="containerimg"><img  src="'+ src+'"/  id="'+idphoto+'" onclick="javascript:showImage(this.id)" ><input type="checkbox" class="checkbox" id="'+idphoto+'c" /></div>';
+				  							  
+						}
+				}
+				}
+			 );
+	  document.getElementById('gallery').disabled=false;
+	
+}
+
+function showImage(img)
+  {
+	
+	// i get the all sizes of an image and show one of them that its weidth is bigger than 
+	  apiurl_size = "https://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=1e0f0609346f0acca9c31f1e9d7a1d02&photo_id="+img+"&format=json&nojsoncallback=1";
+
+		getJSON(apiurl_size,function(err, data) 
+		{
+  			if (err != null) 
+				{
+    				alert("Something went wrong: " + err);
+  				}
+			else 
+				{
+	  				var count = Object.keys(data.sizes.size).length;
+					for (i = 0; i < count; i++) 
+						{
+							if(data.sizes.size[i].width>500)
+			  					{
+				  					var pages=data.sizes.size[i].source
+									window.open(data.sizes.size[i].source,"mywin","menubar=0,resizable=1,width="+data.sizes.size[i].width+",height="+data.sizes.size[i].height+"");
+									break;
+			  					}
+						}
+				}
+		});
+}
+//this functionn chnage the height and width of selected images 
+function viewgallery()
+ {
+		for (var i=0;arr.length;i++)
+			{
+				if (document.getElementById(arr[i]+'c').checked)
+					{
+						document.getElementById(arr[i]).style.height="75px";
+						document.getElementById(arr[i]).style.width="75px";	
+					}
+			}
+ }
+</script>
+</head>
+<body>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>jQuery.getJSON demo</title>
+  
+</head>
+<body>
+ 
+<div id="images"></div>
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h2>Search for photos</h2>
+
+<input type="text" id="searchbox" placeholder="insert a text for search" >
+</div>
+</div>
+<div class="row">
+
+</div>
+<div class="row">
+<div class="col-md-12">
+<h2>Before a new search press Reset button </h2>
+<button type="button" class="button" id="button" onClick="runsearch()">Search  Photos</button>
+<button type="button" class="button" id="gallery" disabled onClick="viewgallery()">View gallery</button>
+<button type="button" class="button" id="reset" onClick="eraseText()">Reset</button>
+<hr>
+</div>
+</div>
+<div id="results">Results are:</br></div>
+</div>
+</body>
+</html>
